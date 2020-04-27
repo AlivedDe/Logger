@@ -21,10 +21,5 @@ namespace Logger
         /// Foreground color for Info messages
         /// </summary>
         ConsoleColor InfoForeColor { get; }
-
-        /// <summary>
-        /// Gets a Foreground color for provided LogLevel
-        /// </summary>
-        ConsoleColor GetColor(LogLevel logLevel);
     }
 }

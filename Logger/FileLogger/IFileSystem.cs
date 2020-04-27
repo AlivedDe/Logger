@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System.Threading.Tasks;
 
 namespace Logger
 {
@@ -11,6 +11,7 @@ namespace Logger
         /// Creates a System.IO.StreamWriter that appends UTF-8 encoded text to an existing file, or to a new file if the specified file does not exist.
         /// </summary>
         /// <param name="fileName">File to create</param>
-        StreamWriter AppendText(string fileName);
+        /// <param name="text">Text to append</param>
+        Task AppendFileAsync(string fileName, string text);
     }
 }

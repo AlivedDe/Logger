@@ -1,4 +1,4 @@
-﻿using System.Data.SqlClient;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace Logger
@@ -9,14 +9,15 @@ namespace Logger
     public class SqlLogger : AbstractLogger, ILogger
     {
         private readonly ISqlLoggerSettings _settings;
-        private const string InsertCommand = "INSERT INTO Log VALUES(@param1, @param2)";
+        private readonly IInsertLogRecordCommand _insertCommand;
 
-        public SqlLogger(ISqlLoggerSettings settings) : base(settings)
+        public SqlLogger(ISqlLoggerSettings settings, IInsertLogRecordCommand insertCommand) : base(settings)
         {
             _settings = settings;
+            _insertCommand = insertCommand ?? throw new ArgumentNullException(nameof(insertCommand));
         }
 
-        protected string GetLogLevelId(LogLevel logLevel)
+        public string GetLogLevelId(LogLevel logLevel)
         {
             switch (logLevel)
             {
@@ -33,19 +34,8 @@ namespace Logger
 
         protected override async Task WriteMessageAsync(string message, LogLevel logLevel)
         {
-            string logIndex = GetLogLevelId(logLevel);
-            using (var connection = new SqlConnection(_settings.ConnectionString))
-            {
-                string formattedMessage = FormatMessage(message, logLevel);
-                connection.Open();
-
-                SqlCommand command = new SqlCommand(InsertCommand, connection);
-
-                command.Parameters.AddWithValue("@param1", formattedMessage);
-                command.Parameters.AddWithValue("@param2", logIndex);
-
-                await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-            }
+            string logLevelId = GetLogLevelId(logLevel);
+            await _insertCommand.Insert(_settings.ConnectionString, message, logLevelId);
         }
     }
 }

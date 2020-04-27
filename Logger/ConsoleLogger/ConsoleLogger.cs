@@ -9,28 +9,37 @@ namespace Logger
     public class ConsoleLogger : AbstractLogger, ILogger
     {
         private readonly IConsoleLoggerSettings _loggerSettings;
-        private static readonly object _locker = new object();
+        private readonly IConsole _console;
 
-        public ConsoleLogger(IConsoleLoggerSettings loggerSettings) : base(loggerSettings)
+        public ConsoleLogger(IConsoleLoggerSettings loggerSettings, IConsole console) : base(loggerSettings)
         {
             _loggerSettings = loggerSettings;
+            _console = console ?? throw new ArgumentNullException(nameof(console));
+        }
+
+        public ConsoleColor GetColor(LogLevel logLevel)
+        {
+            switch (logLevel)
+            {
+                case LogLevel.Warning:
+                    return _loggerSettings.WarningForeColor;
+                case LogLevel.Error:
+                    return _loggerSettings.ErrorForeColor;
+                default:
+                    return _loggerSettings.InfoForeColor;
+            }
         }
 
         protected override Task WriteMessageAsync(string message, LogLevel logLevel)
         {
-            return Task.Run(() =>
-            {
-                lock (_locker)
-                {
-                    ConsoleColor originalColor = Console.ForegroundColor;
-                    ConsoleColor messageColor = _loggerSettings.GetColor(logLevel);
-                    Console.ForegroundColor = messageColor;
+            ConsoleColor messageColor = GetColor(logLevel);
+            _console.ForegroundColor = messageColor;
 
-                    Console.WriteLine(FormatMessage(message, logLevel));
+            _console.WriteLine(message);
 
-                    Console.ForegroundColor = originalColor;
-                }
-            });
+            _console.ResetColor();
+
+            return Task.CompletedTask;
         }
     }
 }

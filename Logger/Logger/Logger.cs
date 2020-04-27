@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Logger
 {
-    public class Logger : AbstractLogger, ILogger
+    public class Logger : ILogger
     {
         private readonly ILogger[] _loggers;
 
-        public Logger(ILoggerSettings loggerSettings, params ILogger[] loggers) : base(loggerSettings)
+        public Logger(params ILogger[] loggers)
         {
             if (loggers.Length == 0)
             {
@@ -17,13 +17,8 @@ namespace Logger
             _loggers = loggers;
         }
 
-        protected override Task WriteMessageAsync(string message, LogLevel logLevel)
+        public Task LogMessageAsync(string message, LogLevel logLevel)
         {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return Task.CompletedTask;
-            }
-
             return Task.WhenAll(_loggers.Select(logger => logger.LogMessageAsync(message, logLevel)));
         }
     }
