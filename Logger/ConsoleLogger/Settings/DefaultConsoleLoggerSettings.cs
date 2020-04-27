@@ -13,18 +13,5 @@ namespace Logger.Settings
         public ConsoleColor WarningForeColor { get; set; } = ConsoleColor.Yellow;
 
         public ConsoleColor InfoForeColor { get; set; } = ConsoleColor.White;
-
-        public ConsoleColor GetColor(LogLevel logLevel)
-        {
-            switch (LogLevel)
-            {
-                case LogLevel.Warning:
-                    return WarningForeColor;
-                case LogLevel.Error:
-                    return ErrorForeColor;
-                default:
-                    return InfoForeColor;
-            }
-        }
     }
 }

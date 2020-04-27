@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Logger
@@ -13,20 +12,14 @@ namespace Logger
         public FileLogger(IFileLoggerSettings settings, IFileSystem fileSystem) : base(settings)
         {
             _settings = settings;
-            _fileSystem = fileSystem;
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
         protected override async Task WriteMessageAsync(string message, LogLevel logLevel)
         {
-            string fileName = Path.Combine(_settings.Directory, string.Format(_settings.FileName, DateTime.Now.ToShortDateString()));
+            string fileName = Path.Combine(_settings.Directory, string.Format(_settings.FileName, DateTime.UtcNow.ToString("yyyy-MM-dd")));
 
-            string formattedMessage = FormatMessage(message, logLevel);
-            byte[] bytes = Encoding.UTF8.GetBytes(formattedMessage);
-
-            using (StreamWriter fileStream = _fileSystem.AppendText(fileName))
-            {
-                await fileStream.WriteLineAsync(formattedMessage).ConfigureAwait(false);
-            };
+            await _fileSystem.AppendFileAsync(fileName, message);
         }
     }
 }

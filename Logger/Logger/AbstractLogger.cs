@@ -20,7 +20,8 @@ namespace Logger
                 return Task.CompletedTask;
             }
 
-            return WriteMessageAsync(message, logLevel);
+            string formattedMessage = FormatMessage(message, logLevel);
+            return WriteMessageAsync(formattedMessage, logLevel);
         }
 
         public bool ShouldLog(LogLevel logLevel)
@@ -33,7 +34,7 @@ namespace Logger
             return !string.IsNullOrWhiteSpace(message);
         }
 
-        protected string FormatMessage(string message, LogLevel logLevel)
+        public string FormatMessage(string message, LogLevel logLevel)
         {
             return string.Format(_loggerSettings.MessageFormat, logLevel, DateTime.UtcNow, message);
         }
